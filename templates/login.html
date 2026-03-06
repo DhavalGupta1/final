@@ -1,0 +1,149 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Login - SOSupport | Emergency Response System</title>
+    <meta name="description" content="SOSupport - AI-powered emergency incident analysis and resource coordination platform">
+    <script src="https://cdn.tailwindcss.com"></script>
+    <script>
+        tailwind.config = {
+            theme: {
+                extend: {
+                    colors: {
+                        slate: {
+                            850: '#172033',
+                            950: '#0a0f1a'
+                        }
+                    }
+                }
+            }
+        }
+    </script>
+    <link rel="stylesheet" href="/static/css/styles.css">
+</head>
+<body class="bg-slate-950 text-slate-100 min-h-screen flex items-center justify-center p-4">
+    <div class="w-full max-w-md">
+        <!-- Logo and Header -->
+        <div class="text-center mb-8">
+            <h1 class="text-4xl font-bold text-white mb-2 tracking-tight">SOSupport</h1>
+            <p class="text-slate-400">Emergency Response System</p>
+        </div>
+
+        <!-- Login Card -->
+        <div class="card p-8">
+            <h2 class="text-xl font-semibold text-white mb-6 text-center">Sign In</h2>
+            
+            <form id="login-form" class="space-y-5">
+                <div>
+                    <label for="username" class="form-label">Username</label>
+                    <input 
+                        type="text" 
+                        id="username" 
+                        name="username" 
+                        class="form-input" 
+                        placeholder="Enter your username"
+                        required
+                        autocomplete="username"
+                    >
+                </div>
+
+                <div>
+                    <label for="password" class="form-label">Password</label>
+                    <input 
+                        type="password" 
+                        id="password" 
+                        name="password" 
+                        class="form-input" 
+                        placeholder="Enter your password"
+                        required
+                        autocomplete="current-password"
+                    >
+                </div>
+
+                <div id="error-message" class="hidden p-3 rounded-lg bg-red-900/50 border border-red-800 text-red-300 text-sm">
+                    Invalid credentials. Please try again.
+                </div>
+
+                <button type="submit" id="login-btn" class="btn-primary w-full py-3 flex items-center justify-center gap-2">
+                    <span>Login</span>
+                    <svg id="login-spinner" class="hidden w-5 h-5 animate-spin" fill="none" viewBox="0 0 24 24">
+                        <circle class="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" stroke-width="4"></circle>
+                        <path class="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"></path>
+                    </svg>
+                </button>
+            </form>
+
+            <!-- Demo Credentials -->
+            <div class="mt-6 p-4 rounded-lg bg-slate-800/50 border border-slate-700">
+                <p class="text-sm text-slate-400 mb-3 font-medium">Demo Credentials:</p>
+                <div class="space-y-2 text-sm">
+                    <div class="flex justify-between items-center p-2 rounded bg-slate-900/50">
+                        <div>
+                            <span class="text-slate-300">User:</span>
+                            <span class="text-blue-400 ml-2 font-mono">user1 / user123</span>
+                        </div>
+                        <span class="px-2 py-0.5 rounded bg-blue-900/50 text-blue-300 text-xs">Reporter</span>
+                    </div>
+                    <div class="flex justify-between items-center p-2 rounded bg-slate-900/50">
+                        <div>
+                            <span class="text-slate-300">Admin:</span>
+                            <span class="text-purple-400 ml-2 font-mono">admin / admin123</span>
+                        </div>
+                        <span class="px-2 py-0.5 rounded bg-purple-900/50 text-purple-300 text-xs">Control Room</span>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Footer -->
+        <div class="mt-6 text-center">
+            <p class="text-sm text-slate-500">AI-powered incident analysis and resource coordination</p>
+        </div>
+    </div>
+
+    <script>
+        document.getElementById('login-form').addEventListener('submit', async function(e) {
+            e.preventDefault();
+            
+            const username = document.getElementById('username').value.trim();
+            const password = document.getElementById('password').value;
+            const errorEl = document.getElementById('error-message');
+            const btnText = document.querySelector('#login-btn span');
+            const spinner = document.getElementById('login-spinner');
+            const btn = document.getElementById('login-btn');
+            
+            // Show loading
+            btn.disabled = true;
+            spinner.classList.remove('hidden');
+            errorEl.classList.add('hidden');
+            
+            try {
+                const response = await fetch('/api/login', {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify({ username, password })
+                });
+                
+                const data = await response.json();
+                
+                if (data.success) {
+                    // Store user info in localStorage for client-side access
+                    localStorage.setItem('user', JSON.stringify(data.user));
+                    // Redirect to dashboard
+                    window.location.href = '/';
+                } else {
+                    errorEl.textContent = data.error || 'Invalid credentials. Please try again.';
+                    errorEl.classList.remove('hidden');
+                }
+            } catch (error) {
+                errorEl.textContent = 'Connection error. Please try again.';
+                errorEl.classList.remove('hidden');
+            } finally {
+                btn.disabled = false;
+                spinner.classList.add('hidden');
+            }
+        });
+    </script>
+</body>
+</html>

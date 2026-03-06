@@ -1,0 +1,122 @@
+{% extends "base.html" %}
+
+{% block title %}Incident History{% endblock %}
+{% block page_title %}Incident History{% endblock %}
+{% block page_subtitle %}View and manage past incident analyses{% endblock %}
+
+{% block content %}
+<div class="max-w-6xl mx-auto space-y-6">
+    <!-- Stats Summary -->
+    <div id="history-stats" class="grid grid-cols-2 md:grid-cols-5 gap-4">
+        <!-- Populated by JavaScript -->
+    </div>
+    
+    <!-- Empty State -->
+    <div id="empty-state" class="card p-8 text-center hidden">
+        <svg class="w-16 h-16 text-slate-600 mx-auto mb-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 5H7a2 2 0 00-2 2v12a2 2 0 002 2h10a2 2 0 002-2V7a2 2 0 00-2-2h-2M9 5a2 2 0 002 2h2a2 2 0 002-2M9 5a2 2 0 012-2h2a2 2 0 012 2"/>
+        </svg>
+        <h3 class="text-lg font-medium text-slate-400 mb-2">No incidents recorded</h3>
+        <p class="text-sm text-slate-500">Report your first incident from the <a href="/" class="text-blue-400 hover:underline">Dashboard</a></p>
+    </div>
+
+    <!-- History Card -->
+    <div class="card">
+        <div class="card-header flex flex-col md:flex-row md:items-center md:justify-between gap-4">
+            <div>
+                <h3 class="card-title">Analyzed Incidents</h3>
+                <p class="card-description">History of all analyzed incidents (stored locally)</p>
+            </div>
+            {% if user and user.role == 'admin' %}
+            <button type="button" id="clear-history-btn" class="btn btn-danger">
+                <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5 4v6m4-6v6m1-10V4a1 1 0 00-1-1h-4a1 1 0 00-1 1v3M4 7h16"/>
+                </svg>
+                Clear History
+            </button>
+            {% endif %}
+        </div>
+        
+        <!-- History Container -->
+        <div id="history-container">
+            <!-- Populated by JavaScript -->
+        </div>
+    </div>
+</div>
+
+<!-- Incident Detail Modal -->
+<div id="incident-modal" class="modal-overlay">
+    <div class="modal">
+        <div class="modal-header">
+            <h3>Incident Details</h3>
+            <button type="button" class="modal-close" onclick="closeModal()">
+                <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12"/>
+                </svg>
+            </button>
+        </div>
+        <div class="modal-body space-y-4">
+            <!-- Timestamp -->
+            <div>
+                <label class="text-xs font-medium text-slate-500 uppercase tracking-wide">Timestamp</label>
+                <p id="modal-timestamp" class="text-slate-300 mt-1">-</p>
+            </div>
+            
+            <!-- Reported By -->
+            <div>
+                <label class="text-xs font-medium text-slate-500 uppercase tracking-wide">Reported By</label>
+                <p id="modal-reporter" class="text-slate-300 mt-1">-</p>
+            </div>
+            
+            <!-- Description -->
+            <div>
+                <label class="text-xs font-medium text-slate-500 uppercase tracking-wide">Description</label>
+                <p id="modal-description" class="text-slate-300 mt-1 text-sm leading-relaxed">-</p>
+            </div>
+            
+            <!-- Classification -->
+            <div class="grid grid-cols-3 gap-4">
+                <div>
+                    <label class="text-xs font-medium text-slate-500 uppercase tracking-wide">Incident Type</label>
+                    <p id="modal-type" class="text-white font-medium mt-1">-</p>
+                </div>
+                <div>
+                    <label class="text-xs font-medium text-slate-500 uppercase tracking-wide">Severity</label>
+                    <span id="modal-severity" class="severity-badge severity-1 mt-1 inline-block">-</span>
+                </div>
+                <div>
+                    <label class="text-xs font-medium text-slate-500 uppercase tracking-wide">Status</label>
+                    <span id="modal-status" class="text-xs px-2 py-1 rounded mt-1 inline-block">-</span>
+                </div>
+            </div>
+            
+            <!-- Features -->
+            <div>
+                <label class="text-xs font-medium text-slate-500 uppercase tracking-wide">Extracted Features</label>
+                <div id="modal-features" class="feature-tags mt-2">
+                    <!-- Populated by JavaScript -->
+                </div>
+            </div>
+            
+            <!-- Dispatch -->
+            <div>
+                <label class="text-xs font-medium text-slate-500 uppercase tracking-wide">Dispatch Recommendation</label>
+                <div id="modal-dispatch" class="grid grid-cols-5 gap-2 mt-2 text-center">
+                    <!-- Populated by JavaScript -->
+                </div>
+            </div>
+        </div>
+        <div class="modal-footer">
+            <button type="button" class="btn btn-secondary" onclick="closeModal()">Close</button>
+        </div>
+    </div>
+</div>
+{% endblock %}
+
+{% block scripts %}
+<script>
+    document.addEventListener('DOMContentLoaded', function() {
+        initHistory();
+    });
+</script>
+{% endblock %}

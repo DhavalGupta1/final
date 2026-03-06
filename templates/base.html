@@ -1,0 +1,144 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>{% block title %}SOSupport{% endblock %} - Emergency Response System</title>
+    <meta name="description" content="SOSupport - AI-powered emergency incident analysis and resource coordination platform">
+    <script src="https://cdn.tailwindcss.com"></script>
+    <script>
+        tailwind.config = {
+            theme: {
+                extend: {
+                    colors: {
+                        slate: {
+                            850: '#172033',
+                            950: '#0a0f1a'
+                        }
+                    }
+                }
+            }
+        }
+    </script>
+    <link rel="stylesheet" href="/static/css/styles.css">
+</head>
+<body class="bg-slate-950 text-slate-100 min-h-screen">
+    <div class="flex min-h-screen">
+        <!-- Sidebar -->
+        <aside id="sidebar" class="w-64 bg-slate-900 border-r border-slate-800 flex flex-col fixed h-full z-40 transform -translate-x-full md:translate-x-0 transition-transform duration-200">
+            <!-- Logo -->
+            <div class="p-6 border-b border-slate-800">
+                <div class="text-center">
+                    <h1 class="font-bold text-2xl text-white tracking-tight">SOSupport</h1>
+                    <p class="text-xs text-slate-400 mt-1">Emergency Response System</p>
+                </div>
+            </div>
+
+            <!-- Navigation -->
+            <nav class="flex-1 p-4">
+                <ul class="space-y-2">
+                    <li>
+                        <a href="/" class="nav-link flex items-center gap-3 px-4 py-3 rounded-lg transition-colors {% if request.path == '/' %}bg-blue-600 text-white{% else %}text-slate-300 hover:bg-slate-800{% endif %}">
+                            <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 19v-6a2 2 0 00-2-2H5a2 2 0 00-2 2v6a2 2 0 002 2h2a2 2 0 002-2zm0 0V9a2 2 0 012-2h2a2 2 0 012 2v10m-6 0a2 2 0 002 2h2a2 2 0 002-2m0 0V5a2 2 0 012-2h2a2 2 0 012 2v14a2 2 0 01-2 2h-2a2 2 0 01-2-2z"/>
+                            </svg>
+                            <span>Dashboard</span>
+                        </a>
+                    </li>
+                    {% if user and user.role == 'admin' %}
+                    <li>
+                        <a href="/resources" class="nav-link flex items-center gap-3 px-4 py-3 rounded-lg transition-colors {% if request.path == '/resources' %}bg-blue-600 text-white{% else %}text-slate-300 hover:bg-slate-800{% endif %}">
+                            <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 11H5m14 0a2 2 0 012 2v6a2 2 0 01-2 2H5a2 2 0 01-2-2v-6a2 2 0 012-2m14 0V9a2 2 0 00-2-2M5 11V9a2 2 0 012-2m0 0V5a2 2 0 012-2h6a2 2 0 012 2v2M7 7h10"/>
+                            </svg>
+                            <span>Resources</span>
+                            <span class="ml-auto px-2 py-0.5 text-xs rounded bg-blue-900/50 text-blue-300">Admin</span>
+                        </a>
+                    </li>
+                    {% endif %}
+                    <li>
+                        <a href="/history" class="nav-link flex items-center gap-3 px-4 py-3 rounded-lg transition-colors {% if request.path == '/history' %}bg-blue-600 text-white{% else %}text-slate-300 hover:bg-slate-800{% endif %}">
+                            <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 8v4l3 3m6-3a9 9 0 11-18 0 9 9 0 0118 0z"/>
+                            </svg>
+                            <span>History</span>
+                        </a>
+                    </li>
+                </ul>
+            </nav>
+
+            <!-- User Info and Status -->
+            <div class="p-4 border-t border-slate-800 space-y-3">
+                {% if user %}
+                <div class="flex items-center gap-3 p-2 rounded-lg bg-slate-800/50">
+                    <div class="w-8 h-8 rounded-full bg-gradient-to-br {% if user.role == 'admin' %}from-purple-500 to-purple-700{% else %}from-blue-500 to-blue-700{% endif %} flex items-center justify-center text-white text-sm font-medium">
+                        {{ user.name[0] }}
+                    </div>
+                    <div class="flex-1 min-w-0">
+                        <p class="text-sm font-medium text-white truncate">{{ user.name }}</p>
+                        <p class="text-xs text-slate-400 capitalize">{{ user.role }}</p>
+                    </div>
+                </div>
+                <button onclick="logout()" class="w-full flex items-center justify-center gap-2 px-4 py-2 rounded-lg text-sm text-slate-300 hover:bg-slate-800 transition-colors">
+                    <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M17 16l4-4m0 0l-4-4m4 4H7m6 4v1a3 3 0 01-3 3H6a3 3 0 01-3-3V7a3 3 0 013-3h4a3 3 0 013 3v1"/>
+                    </svg>
+                    <span>Logout</span>
+                </button>
+                {% else %}
+                <a href="/login" class="w-full flex items-center justify-center gap-2 px-4 py-2 rounded-lg text-sm text-slate-300 hover:bg-slate-800 transition-colors border border-slate-700">
+                    <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M11 16l-4-4m0 0l4-4m-4 4h14m-5 4v1a3 3 0 01-3 3H6a3 3 0 01-3-3V7a3 3 0 013-3h7a3 3 0 013 3v1"/>
+                    </svg>
+                    <span>Admin Login</span>
+                </a>
+                {% endif %}
+                <div class="flex items-center gap-2 text-sm">
+                    <span class="w-2 h-2 rounded-full bg-green-500 animate-pulse"></span>
+                    <span class="text-slate-400">System Online</span>
+                </div>
+            </div>
+        </aside>
+
+        <!-- Mobile menu button -->
+        <button id="menu-toggle" class="md:hidden fixed top-4 left-4 z-50 p-2 rounded-lg bg-slate-800 text-white">
+            <svg class="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 6h16M4 12h16M4 18h16"/>
+            </svg>
+        </button>
+
+        <!-- Main Content -->
+        <main class="flex-1 md:ml-64">
+            <!-- Header -->
+            <header class="bg-slate-900/50 backdrop-blur border-b border-slate-800 px-6 py-4 sticky top-0 z-30">
+                <div class="flex items-center justify-between">
+                    <div>
+                        <h2 class="text-xl font-semibold text-white">{% block page_title %}Dashboard{% endblock %}</h2>
+                        <p class="text-sm text-slate-400">{% block page_subtitle %}Emergency Incident Analysis{% endblock %}</p>
+                    </div>
+                    <div class="flex items-center gap-4">
+                        <div class="hidden md:flex items-center gap-2 px-3 py-1.5 rounded-full text-xs font-medium bg-slate-800 text-slate-300">
+                            <span class="text-orange-400">112</span> Emergency | <span class="text-red-400">108</span> Ambulance | <span class="text-blue-400">100</span> Police
+                        </div>
+                        <div id="model-status" class="flex items-center gap-2 px-3 py-1.5 rounded-full text-xs font-medium {% if models_loaded %}bg-green-900/50 text-green-400{% else %}bg-amber-900/50 text-amber-400{% endif %}">
+                            <span class="w-2 h-2 rounded-full {% if models_loaded %}bg-green-400{% else %}bg-amber-400{% endif %}"></span>
+                            {% if models_loaded %}ML Active{% else %}Rule-Based{% endif %}
+                        </div>
+                    </div>
+                </div>
+            </header>
+
+            <!-- Page Content -->
+            <div class="p-6">
+                {% block content %}{% endblock %}
+            </div>
+        </main>
+    </div>
+
+    <!-- Mobile menu overlay -->
+    <div id="overlay" class="fixed inset-0 bg-black/50 z-30 hidden md:hidden"></div>
+
+    <script src="/static/js/app.js"></script>
+    {% block scripts %}{% endblock %}
+</body>
+</html>

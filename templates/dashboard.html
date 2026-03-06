@@ -1,0 +1,252 @@
+{% extends "base.html" %}
+
+{% block title %}Dashboard{% endblock %}
+{% block page_title %}Incident Analysis{% endblock %}
+{% block page_subtitle %}Analyze emergency incidents and get dispatch recommendations{% endblock %}
+
+{% block content %}
+<div class="max-w-4xl mx-auto space-y-6">
+    <!-- Current Resource Status -->
+    <div class="card bg-slate-800/30">
+        <div class="card-header">
+            <h3 class="card-title text-sm">Available Resources</h3>
+            <p class="card-description text-xs">Current available units (in use by active incidents are deducted)</p>
+        </div>
+        <div id="resource-status" class="grid grid-cols-2 md:grid-cols-5 gap-2">
+            <!-- Populated by JavaScript -->
+        </div>
+    </div>
+
+    <!-- Incident Input Card -->
+    <div class="card">
+        <div class="card-header">
+            <h3 class="card-title">Report Emergency Incident</h3>
+            <p class="card-description">Enter a detailed description of the emergency incident for AI-powered analysis</p>
+        </div>
+        
+        <form id="incident-form">
+            <!-- Location and Weather -->
+            <div class="form-group">
+                <label for="incident-location" class="form-label">Location (City/Town)</label>
+                <div class="flex gap-3">
+                    <div class="flex-1 relative">
+                        <input 
+                            type="text" 
+                            id="incident-location" 
+                            name="location" 
+                            class="form-input"
+                            placeholder="Enter city name (e.g., Delhi, Mumbai, Rampur)"
+                        />
+                    </div>
+                    <button type="button" id="fetch-weather-btn" onclick="fetchWeather()" class="btn btn-secondary">
+                        <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M3 15a4 4 0 004 4h9a5 5 0 10-.1-9.999 5.002 5.002 0 10-9.78 2.096A4.001 4.001 0 003 15z"/>
+                        </svg>
+                        Get Weather
+                    </button>
+                </div>
+            </div>
+            
+            <!-- Weather Display -->
+            <div id="weather-display" class="form-group hidden">
+                <label class="form-label">Current Weather Conditions</label>
+                <div class="bg-slate-800/50 rounded-lg p-4">
+                    <div class="flex items-center justify-between">
+                        <div class="flex items-center gap-4">
+                            <div id="weather-icon" class="text-4xl">--</div>
+                            <div>
+                                <p id="weather-city" class="text-lg font-semibold text-white">--</p>
+                                <p id="weather-desc" class="text-sm text-slate-400 capitalize">--</p>
+                            </div>
+                        </div>
+                        <div class="text-right">
+                            <p id="weather-temp" class="text-2xl font-bold text-white">--</p>
+                            <p class="text-xs text-slate-400">Temperature</p>
+                        </div>
+                    </div>
+                    <div class="grid grid-cols-3 gap-4 mt-4 pt-4 border-t border-slate-700">
+                        <div class="text-center">
+                            <p id="weather-humidity" class="text-lg font-medium text-blue-400">--</p>
+                            <p class="text-xs text-slate-400">Humidity</p>
+                        </div>
+                        <div class="text-center">
+                            <p id="weather-wind" class="text-lg font-medium text-green-400">--</p>
+                            <p class="text-xs text-slate-400">Wind Speed</p>
+                        </div>
+                        <div class="text-center">
+                            <p id="weather-visibility" class="text-lg font-medium text-amber-400">--</p>
+                            <p class="text-xs text-slate-400">Visibility</p>
+                        </div>
+                    </div>
+                    <input type="hidden" id="weather-category" name="weather_category" value="">
+                </div>
+            </div>
+
+            <div class="form-group">
+                <label for="incident-description" class="form-label">Incident Description</label>
+                <textarea 
+                    id="incident-description" 
+                    name="description" 
+                    class="form-textarea"
+                    placeholder="Example: Major road accident on NH-48 near Manesar toll plaza. 3 vehicles involved including a truck. 5 people injured, one critical. Traffic jam extending 3 km. One car is on fire."
+                    rows="5"
+                    required
+                ></textarea>
+                <p class="text-xs text-slate-500 mt-2">Weather will be automatically included from the location above if fetched</p>
+            </div>
+            
+            <div class="flex items-center justify-between">
+                <div class="text-sm text-slate-500">
+                    Tip: Include details about injuries, incident type, and traffic conditions
+                </div>
+                <button type="submit" id="analyze-btn" class="btn btn-primary">
+                    <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 5H7a2 2 0 00-2 2v12a2 2 0 002 2h10a2 2 0 002-2V7a2 2 0 00-2-2h-2M9 5a2 2 0 002 2h2a2 2 0 002-2M9 5a2 2 0 012-2h2a2 2 0 012 2m-6 9l2 2 4-4"/>
+                    </svg>
+                    Report Incident
+                </button>
+            </div>
+        </form>
+    </div>
+
+    <!-- Results Section (hidden until analysis) -->
+    <div id="results-section" class="results-section space-y-6">
+        <!-- Analysis Results -->
+        <div class="card">
+            <div class="card-header">
+                <h3 class="card-title">Analysis Results</h3>
+                <p class="card-description">AI-extracted features and incident classification</p>
+            </div>
+            
+            <div class="space-y-6">
+                <!-- Extracted Features -->
+                <div>
+                    <h4 class="text-sm font-medium text-slate-400 mb-3">Extracted Features</h4>
+                    <div id="extracted-features" class="feature-tags">
+                        <!-- Populated by JavaScript -->
+                    </div>
+                </div>
+
+                <!-- Incident Classification -->
+                <div class="grid md:grid-cols-2 gap-6">
+                    <div class="bg-slate-800/50 rounded-lg p-4">
+                        <h4 class="text-sm font-medium text-slate-400 mb-2">Incident Type</h4>
+                        <p id="incident-type" class="text-xl font-semibold text-white mb-3">-</p>
+                        <div id="type-confidence" class="confidence-meter">
+                            <!-- Populated by JavaScript -->
+                        </div>
+                    </div>
+
+                    <div class="bg-slate-800/50 rounded-lg p-4">
+                        <h4 class="text-sm font-medium text-slate-400 mb-2">Severity Assessment</h4>
+                        <div class="flex items-center gap-4 mb-3">
+                            <span id="severity-badge" class="severity-badge severity-3">Moderate (3/5)</span>
+                        </div>
+                        <div id="severity-meter" class="severity-meter mb-3">
+                            <!-- Populated by JavaScript -->
+                        </div>
+                        <div id="severity-confidence" class="confidence-meter">
+                            <!-- Populated by JavaScript -->
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Dispatch Recommendations -->
+        <div class="card">
+            <div class="card-header">
+                <h3 class="card-title">Dispatch Recommendations</h3>
+                <p class="card-description">Suggested emergency resource allocation based on incident analysis</p>
+            </div>
+
+            <div class="space-y-6">
+                <!-- Resource Grid -->
+                <div id="dispatch-grid" class="dispatch-grid">
+                    <!-- Populated by JavaScript -->
+                </div>
+
+                <!-- Warnings -->
+                <div id="dispatch-warnings" class="space-y-3 hidden">
+                    <!-- Populated by JavaScript -->
+                </div>
+
+                <!-- Rationale -->
+                <div class="bg-slate-800/50 rounded-lg p-4">
+                    <h4 class="text-sm font-medium text-slate-400 mb-2">Rationale</h4>
+                    <p id="dispatch-rationale" class="text-slate-300 text-sm leading-relaxed">
+                        <!-- Populated by JavaScript -->
+                    </p>
+                </div>
+            </div>
+        </div>
+
+        <!-- Action Buttons -->
+        <div class="flex justify-end gap-4">
+            <button type="button" onclick="document.getElementById('incident-form').reset(); document.getElementById('results-section').classList.remove('visible');" class="btn btn-secondary">
+                Clear & New Analysis
+            </button>
+        </div>
+    </div>
+
+    <!-- Sample Incidents (for testing) -->
+    <div class="card">
+        <div class="card-header">
+            <h3 class="card-title">Sample Incidents</h3>
+            <p class="card-description">Click to load a sample incident description for testing</p>
+        </div>
+        
+        <div class="grid md:grid-cols-2 gap-3">
+            <button type="button" onclick="loadSample('traffic')" class="text-left p-3 bg-slate-800/50 hover:bg-slate-700/50 rounded-lg transition-colors">
+                <div class="flex items-center gap-2 text-blue-400 font-medium mb-1">
+                    <span>Road Accident</span>
+                </div>
+                <p class="text-xs text-slate-400">NH highway collision near Rampur toll plaza with injuries</p>
+            </button>
+            
+            <button type="button" onclick="loadSample('fire')" class="text-left p-3 bg-slate-800/50 hover:bg-slate-700/50 rounded-lg transition-colors">
+                <div class="flex items-center gap-2 text-orange-400 font-medium mb-1">
+                    <span>Fire Incident</span>
+                </div>
+                <p class="text-xs text-slate-400">Building fire in Sarojini Nagar market area</p>
+            </button>
+            
+            <button type="button" onclick="loadSample('medical')" class="text-left p-3 bg-slate-800/50 hover:bg-slate-700/50 rounded-lg transition-colors">
+                <div class="flex items-center gap-2 text-red-400 font-medium mb-1">
+                    <span>Medical Emergency</span>
+                </div>
+                <p class="text-xs text-slate-400">Heart attack at Chandni Chowk metro station</p>
+            </button>
+            
+            <button type="button" onclick="loadSample('natural')" class="text-left p-3 bg-slate-800/50 hover:bg-slate-700/50 rounded-lg transition-colors">
+                <div class="flex items-center gap-2 text-amber-400 font-medium mb-1">
+                    <span>Natural Disaster</span>
+                </div>
+                <p class="text-xs text-slate-400">Flooding in low-lying areas of Patna during monsoon</p>
+            </button>
+        </div>
+    </div>
+</div>
+{% endblock %}
+
+{% block scripts %}
+<script>
+const sampleIncidents = {
+    traffic: "Major road accident on NH-48 near Rampur toll plaza, Gurugram. Heavy monsoon rain with poor visibility. 4 vehicles involved including an HRTC bus and a Maruti Swift. At least 6 people injured, 2 critically including a child. Traffic jam extending 4 km towards Delhi side. One car appears to be leaking petrol. Local villagers helping with rescue.",
+    fire: "Massive fire reported at Sarojini Nagar Central Market, South Delhi. Flames visible from multiple shops in the garment section. Dense smoke spreading to nearby residential areas. Fire brigade informed, but narrow lanes making access difficult. Approximately 15-20 shop owners and customers may still be trapped inside. LPG cylinders stored in some shops. Clear summer weather, high wind spreading fire.",
+    medical: "Medical emergency at Chandni Chowk Metro Station, Gate 3. A 58-year-old man collapsed on the platform during rush hour. Witnesses report he complained of severe chest pain before falling unconscious. Security personnel performing CPR. Patient is diabetic as per his family member present. Metro authorities requesting immediate ambulance. Crowd gathering causing congestion.",
+    natural: "Flash flood emergency in Kankarbagh area, Patna. Heavy rainfall overnight causing Ganga water level to rise rapidly. Multiple residential colonies submerged with families trapped on rooftops. At least 50 families need immediate evacuation. Water level at 6 feet in some areas and rising. NDRF teams requested. Boats needed for rescue. Children and elderly at high risk."
+};
+
+function loadSample(type) {
+    const textarea = document.getElementById('incident-description');
+    if (textarea && sampleIncidents[type]) {
+        textarea.value = sampleIncidents[type];
+        textarea.focus();
+    }
+}
+
+// Make function global
+window.loadSample = loadSample;
+</script>
+{% endblock %}

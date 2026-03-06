@@ -1,0 +1,214 @@
+{% extends "base.html" %}
+
+{% block title %}Resources{% endblock %}
+{% block page_title %}Resource Management{% endblock %}
+{% block page_subtitle %}Configure available emergency response units - Admin Only{% endblock %}
+
+{% block content %}
+<div class="max-w-4xl mx-auto space-y-6">
+    <!-- Admin Notice -->
+    <div class="bg-purple-900/30 border border-purple-800 rounded-lg p-4">
+        <div class="flex items-center gap-3">
+            <svg class="w-5 h-5 text-purple-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 9v2m0 4h.01m-6.938 4h13.856c1.54 0 2.502-1.667 1.732-3L13.732 4c-.77-1.333-2.694-1.333-3.464 0L3.34 16c-.77 1.333.192 3 1.732 3z"/>
+            </svg>
+            <div>
+                <p class="text-purple-300 font-medium">Control Room Admin Access</p>
+                <p class="text-purple-400/70 text-sm">Only authorized personnel can modify resource allocations.</p>
+            </div>
+        </div>
+    </div>
+
+    <!-- Resource Configuration Card -->
+    <div class="card">
+        <div class="card-header">
+            <h3 class="card-title">Available Resources</h3>
+            <p class="card-description">Set the number of available units for each resource type. These values are used when calculating dispatch recommendations.</p>
+        </div>
+        
+        <!-- Resource Grid -->
+        <div id="resources-container" class="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-5 gap-4 mb-6">
+            <!-- Populated by JavaScript -->
+        </div>
+        
+        <!-- Action Buttons -->
+        <div class="flex items-center justify-between pt-4 border-t border-slate-700">
+            <button type="button" id="reset-resources-btn" class="btn btn-secondary">
+                <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 4v5h.582m15.356 2A8.001 8.001 0 004.582 9m0 0H9m11 11v-5h-.581m0 0a8.003 8.003 0 01-15.357-2m15.357 2H15"/>
+                </svg>
+                Reset to Defaults
+            </button>
+            <button type="button" id="save-resources-btn" class="btn btn-primary">
+                <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5 13l4 4L19 7"/>
+                </svg>
+                Save Configuration
+            </button>
+        </div>
+    </div>
+
+    <!-- Resource Information -->
+    <div class="card">
+        <div class="card-header">
+            <h3 class="card-title">Resource Guidelines</h3>
+            <p class="card-description">Recommended minimum resource levels by coverage area</p>
+        </div>
+        
+        <div class="overflow-x-auto">
+            <table class="history-table">
+                <thead>
+                    <tr>
+                        <th>Resource Type</th>
+                        <th>Small City<br><span class="font-normal text-slate-500">(&lt;500K pop)</span></th>
+                        <th>Medium City<br><span class="font-normal text-slate-500">(500K-2M pop)</span></th>
+                        <th>Metro City<br><span class="font-normal text-slate-500">(&gt;2M pop)</span></th>
+                    </tr>
+                </thead>
+                <tbody>
+                    <tr>
+                        <td class="font-medium text-white">Ambulances (108)</td>
+                        <td>5-8</td>
+                        <td>15-25</td>
+                        <td>40-60</td>
+                    </tr>
+                    <tr>
+                        <td class="font-medium text-white">Fire Tenders</td>
+                        <td>3-5</td>
+                        <td>10-15</td>
+                        <td>25-40</td>
+                    </tr>
+                    <tr>
+                        <td class="font-medium text-white">Police PCR Vans</td>
+                        <td>8-12</td>
+                        <td>25-40</td>
+                        <td>60-100</td>
+                    </tr>
+                    <tr>
+                        <td class="font-medium text-white">NDRF Teams</td>
+                        <td>1</td>
+                        <td>2-3</td>
+                        <td>4-6</td>
+                    </tr>
+                    <tr>
+                        <td class="font-medium text-white">Medical Teams</td>
+                        <td>2-3</td>
+                        <td>5-8</td>
+                        <td>12-20</td>
+                    </tr>
+                </tbody>
+            </table>
+        </div>
+    </div>
+
+    <!-- Resource Descriptions -->
+    <div class="grid md:grid-cols-2 gap-4">
+        <div class="card">
+            <div class="flex items-start gap-4">
+                <div class="resource-icon ambulance text-2xl">
+                    <svg class="w-6 h-6 text-red-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 11H5m14 0a2 2 0 012 2v6a2 2 0 01-2 2H5a2 2 0 01-2-2v-6a2 2 0 012-2m14 0V9a2 2 0 00-2-2M5 11V9a2 2 0 012-2m0 0V5a2 2 0 012-2h6a2 2 0 012 2v2M7 7h10"/>
+                    </svg>
+                </div>
+                <div>
+                    <h4 class="font-medium text-white mb-1">108 Ambulance Service</h4>
+                    <p class="text-sm text-slate-400">Government Emergency Medical Service - Free ambulance with trained paramedics. Call 108 for immediate medical transport.</p>
+                </div>
+            </div>
+        </div>
+        
+        <div class="card">
+            <div class="flex items-start gap-4">
+                <div class="resource-icon fire text-2xl">
+                    <svg class="w-6 h-6 text-orange-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M17.657 18.657A8 8 0 016.343 7.343S7 9 9 10c0-2 .5-5 2.986-7C14 5 16.09 5.777 17.656 7.343A7.975 7.975 0 0120 13a7.975 7.975 0 01-2.343 5.657z"/>
+                    </svg>
+                </div>
+                <div>
+                    <h4 class="font-medium text-white mb-1">Fire Tender</h4>
+                    <p class="text-sm text-slate-400">Municipal Fire Brigade vehicles. Call 101 for fire emergencies. Equipped for fire suppression, rescue, and hazmat situations.</p>
+                </div>
+            </div>
+        </div>
+        
+        <div class="card">
+            <div class="flex items-start gap-4">
+                <div class="resource-icon police text-2xl">
+                    <svg class="w-6 h-6 text-blue-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 12l2 2 4-4m5.618-4.016A11.955 11.955 0 0112 2.944a11.955 11.955 0 01-8.618 3.04A12.02 12.02 0 003 9c0 5.591 3.824 10.29 9 11.622 5.176-1.332 9-6.03 9-11.622 0-1.042-.133-2.052-.382-3.016z"/>
+                    </svg>
+                </div>
+                <div>
+                    <h4 class="font-medium text-white mb-1">Police PCR Van</h4>
+                    <p class="text-sm text-slate-400">Police Control Room patrol vehicles. Call 100 or 112 (universal emergency). For traffic control, law enforcement, and crowd management.</p>
+                </div>
+            </div>
+        </div>
+        
+        <div class="card">
+            <div class="flex items-start gap-4">
+                <div class="resource-icon ndrf text-2xl">
+                    <svg class="w-6 h-6 text-yellow-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M13 10V3L4 14h7v7l9-11h-7z"/>
+                    </svg>
+                </div>
+                <div>
+                    <h4 class="font-medium text-white mb-1">NDRF Teams</h4>
+                    <p class="text-sm text-slate-400">National Disaster Response Force - Specialized teams for floods, earthquakes, building collapse, and large-scale disasters.</p>
+                </div>
+            </div>
+        </div>
+        
+        <div class="card md:col-span-2">
+            <div class="flex items-start gap-4">
+                <div class="resource-icon medical text-2xl">
+                    <svg class="w-6 h-6 text-green-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4.318 6.318a4.5 4.5 0 000 6.364L12 20.364l7.682-7.682a4.5 4.5 0 00-6.364-6.364L12 7.636l-1.318-1.318a4.5 4.5 0 00-6.364 0z"/>
+                    </svg>
+                </div>
+                <div>
+                    <h4 class="font-medium text-white mb-1">Medical Teams</h4>
+                    <p class="text-sm text-slate-400">Specialized medical personnel from Government Hospitals. Includes doctors, nurses, and emergency medicine specialists for mass casualty incidents and critical care.</p>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Emergency Helplines -->
+    <div class="card">
+        <div class="card-header">
+            <h3 class="card-title">Emergency Helplines</h3>
+        </div>
+        <div class="grid grid-cols-2 md:grid-cols-4 gap-4">
+            <div class="bg-red-900/30 border border-red-800 rounded-lg p-4 text-center">
+                <p class="text-3xl font-bold text-red-400 mb-1">112</p>
+                <p class="text-sm text-red-300">Universal Emergency</p>
+                <p class="text-xs text-slate-500">All Emergencies</p>
+            </div>
+            <div class="bg-orange-900/30 border border-orange-800 rounded-lg p-4 text-center">
+                <p class="text-3xl font-bold text-orange-400 mb-1">108</p>
+                <p class="text-sm text-orange-300">Ambulance</p>
+                <p class="text-xs text-slate-500">Medical Emergency</p>
+            </div>
+            <div class="bg-blue-900/30 border border-blue-800 rounded-lg p-4 text-center">
+                <p class="text-3xl font-bold text-blue-400 mb-1">100</p>
+                <p class="text-sm text-blue-300">Police</p>
+                <p class="text-xs text-slate-500">Law & Order</p>
+            </div>
+            <div class="bg-yellow-900/30 border border-yellow-800 rounded-lg p-4 text-center">
+                <p class="text-3xl font-bold text-yellow-400 mb-1">101</p>
+                <p class="text-sm text-yellow-300">Fire Brigade</p>
+                <p class="text-xs text-slate-500">Fire Emergency</p>
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}
+
+{% block scripts %}
+<script>
+    document.addEventListener('DOMContentLoaded', function() {
+        initResources();
+    });
+</script>
+{% endblock %}
